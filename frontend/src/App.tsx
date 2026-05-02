@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useChatStore } from './store/chatStore';
-import { Search, Send, Paperclip, MoreVertical, Phone, Video, User } from 'lucide-react';
+import { Search, Send, Paperclip, MoreVertical, Phone, Video } from 'lucide-react';
 
 function App() {
   const { chats, activeChatId, messages, setActiveChat, addMessage } = useChatStore();

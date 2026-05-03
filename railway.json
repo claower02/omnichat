@@ -1,0 +1,17 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "services": {
+    "backend": {
+      "name": "omnichat-backend",
+      "source": {
+        "root": "backend"
+      }
+    },
+    "frontend": {
+      "name": "omnichat-frontend",
+      "source": {
+        "root": "frontend"
+      }
+    }
+  }
+}

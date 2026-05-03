@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { client } from '../api/client'
 
 export interface Message {
   id: number;
@@ -25,20 +26,48 @@ interface ChatState {
   chats: Chat[];
   activeChatId: number | null;
   messages: Message[];
+  loading: boolean;
+  fetchChats: () => Promise<void>;
+  fetchMessages: (chatId: number) => Promise<void>;
   setActiveChat: (id: number) => void;
   addMessage: (msg: Message) => void;
 }
 
-export const useChatStore = create<ChatState>((set) => ({
-  chats: [
-    { id: 1, contact: { id: 1, name: 'Иван Иванов', phone: '+79991234567', provider: 'telegram' }, status: 'open' },
-    { id: 2, contact: { id: 2, name: 'ООО Ромашка', phone: '+79990001122', provider: 'whatsapp' }, status: 'open' }
-  ],
+export const useChatStore = create<ChatState>((set, get) => ({
+  chats: [],
   activeChatId: null,
-  messages: [
-    { id: 1, chatId: 1, sender: 'client', text: 'Здравствуйте, есть вопрос по API', createdAt: new Date().toISOString() },
-    { id: 2, chatId: 1, sender: 'agent', text: 'Добрый день! Слушаю вас', createdAt: new Date().toISOString() }
-  ],
-  setActiveChat: (id) => set({ activeChatId: id }),
-  addMessage: (msg) => set((state) => ({ messages: [...state.messages, msg] }))
+  messages: [],
+  loading: false,
+  fetchChats: async () => {
+    set({ loading: true });
+    try {
+      const res = await client.get('/chats');
+      set({ chats: res.data, loading: false });
+    } catch (err) {
+      console.error('Failed to fetch chats', err);
+      set({ loading: false });
+    }
+  },
+  fetchMessages: async (chatId) => {
+    try {
+      const res = await client.get(`/chats/${chatId}/messages`);
+      set({ messages: res.data });
+    } catch (err) {
+      console.error('Failed to fetch messages', err);
+    }
+  },
+  setActiveChat: (id) => {
+    set({ activeChatId: id });
+    get().fetchMessages(id);
+  },
+  addMessage: (msg) => set((state) => {
+    // Check if message is already in list to avoid duplicates from WS
+    if (state.messages.some(m => m.id === msg.id)) return state;
+    
+    // Only add to view if it belongs to current chat
+    if (msg.chatId === state.activeChatId) {
+      return { messages: [...state.messages, msg] };
+    }
+    return state;
+  })
 }))

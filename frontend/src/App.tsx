@@ -1,24 +1,52 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useChatStore } from './store/chatStore';
 import { Search, Send, Paperclip, MoreVertical, Phone, Video } from 'lucide-react';
+import { client, getWSUrl } from './api/client';
 
 function App() {
-  const { chats, activeChatId, messages, setActiveChat, addMessage } = useChatStore();
+  const { chats, activeChatId, messages, setActiveChat, addMessage, fetchChats, loading } = useChatStore();
   const [inputText, setInputText] = useState('');
 
-  const activeChat = chats.find(c => c.id === activeChatId);
-  const activeMessages = messages.filter(m => m.chatId === activeChatId);
+  // Initial fetch
+  useEffect(() => {
+    fetchChats();
+  }, [fetchChats]);
 
-  const handleSend = () => {
+  // WebSocket setup
+  useEffect(() => {
+    const ws = new WebSocket(getWSUrl());
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.event === 'message.received') {
+          addMessage(data.payload);
+        }
+      } catch (err) {
+        console.error('WS Error parsing data', err);
+      }
+    };
+    return () => ws.close();
+  }, [addMessage]);
+
+  const activeChat = chats.find(c => c.id === activeChatId);
+
+  const handleSend = async () => {
     if (!inputText.trim() || !activeChatId) return;
-    addMessage({
-      id: Date.now(),
-      chatId: activeChatId,
-      sender: 'agent',
-      text: inputText,
-      createdAt: new Date().toISOString(),
-    });
-    setInputText('');
+    
+    try {
+      await client.post(`/chats/${activeChatId}/send`, { text: inputText });
+      // Add message locally for immediate feedback
+      addMessage({
+        id: Date.now(),
+        chatId: activeChatId,
+        sender: 'agent',
+        text: inputText,
+        createdAt: new Date().toISOString(),
+      });
+      setInputText('');
+    } catch (err) {
+      console.error('Failed to send message', err);
+    }
   };
 
   return (
@@ -39,6 +67,8 @@ function App() {
           </div>
         </div>
         <div className="flex-1 overflow-y-auto">
+          {loading && <div className="p-4 text-center text-slate-500">Loading chats...</div>}
+          {!loading && chats.length === 0 && <div className="p-4 text-center text-slate-500 text-sm">No active chats</div>}
           {chats.map(chat => (
             <div 
               key={chat.id} 
@@ -51,11 +81,10 @@ function App() {
               <div className="flex-1 min-w-0">
                 <div className="flex justify-between items-baseline">
                   <h3 className="font-medium text-slate-100 truncate">{chat.contact.name}</h3>
-                  <span className="text-xs text-slate-500 shrink-0">12:30</span>
                 </div>
                 <p className="text-sm text-slate-400 truncate flex items-center gap-1">
                   <span className={`w-2 h-2 rounded-full ${chat.contact.provider === 'whatsapp' ? 'bg-green-500' : 'bg-blue-400'}`}></span>
-                  <span className="truncate">Last message preview...</span>
+                  <span className="truncate">{chat.contact.provider}</span>
                 </p>
               </div>
             </div>
@@ -86,8 +115,8 @@ function App() {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
-              {activeMessages.map((msg) => (
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 flex flex-col">
+              {messages.map((msg) => (
                 <div key={msg.id} className={`flex ${msg.sender === 'agent' ? 'justify-end' : 'justify-start'}`}>
                   <div className={`max-w-[70%] p-4 rounded-2xl shadow-sm ${msg.sender === 'agent' ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-br-none' : 'bg-slate-800 text-slate-200 rounded-bl-none border border-slate-700'}`}>
                     <p className="leading-relaxed whitespace-pre-wrap">{msg.text}</p>
@@ -126,12 +155,11 @@ function App() {
             <div className="w-24 h-24 mb-6 rounded-full bg-slate-800/50 flex items-center justify-center shadow-inner border border-slate-700/50">
               <Search className="w-10 h-10 text-slate-600" />
             </div>
-            <p className="text-xl font-medium text-slate-300 mb-2">No Chat Selected</p>
-            <p className="text-sm">Choose a conversation from the left menu</p>
+            <p className="text-xl font-medium text-slate-300 mb-2">OmniChat Unified Inbox</p>
+            <p className="text-sm">Select a chat to start responding to your clients</p>
           </div>
         )}
       </div>
-
     </div>
   );
 }

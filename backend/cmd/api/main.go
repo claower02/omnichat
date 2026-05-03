@@ -12,11 +12,14 @@ import (
 )
 
 func main() {
+	log.Println(">>> Starting Omnichat Application <<<")
 	// Load .env if exists
 	godotenv.Load()
 
 	// Initialize DB
+	log.Println(">>> Initializing Database...")
 	repository.InitDB()
+	log.Println(">>> Database Initialized")
 
 	// Setup Gin router
 	r := gin.Default()

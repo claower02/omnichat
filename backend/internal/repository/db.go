@@ -15,8 +15,8 @@ var DB *gorm.DB
 func InitDB() {
 	dsn := os.Getenv("DATABASE_URL")
 	if dsn == "" {
-		log.Println("DATABASE_URL not set, using sqlite for local fallback if needed, but assuming postgres")
-		dsn = "host=localhost user=postgres password=postgres dbname=omnichat port=5432 sslmode=disable"
+		log.Println(">>> DATABASE_URL not set. Skipping database connection.")
+		return
 	}
 
 	var err error

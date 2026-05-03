@@ -132,54 +132,6 @@ function App() {
         )}
       </div>
 
-      {/* Right Sidebar - CRM Info */}
-      {activeChat && (
-        <div className="w-80 bg-[#1e293b] border-l border-slate-800 flex flex-col transform transition-transform duration-300 ease-in-out hidden lg:flex">
-          <div className="p-8 border-b border-slate-800 flex flex-col items-center bg-gradient-to-b from-slate-800/50 to-transparent">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-4xl mb-4 shadow-lg ring-4 ring-slate-900/50">
-              {activeChat.contact.name.charAt(0)}
-            </div>
-            <h2 className="text-xl font-semibold text-slate-100 text-center">{activeChat.contact.name}</h2>
-            <p className="text-sm text-slate-400 mt-1 flex items-center gap-1">
-              <Phone className="w-3 h-3" />
-              {activeChat.contact.phone}
-            </p>
-          </div>
-          
-          <div className="p-6 flex-1 overflow-y-auto">
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-xs uppercase font-bold text-slate-500 tracking-wider mb-3">CRM Details</h3>
-                <div className="space-y-3">
-                  <div className="bg-slate-900/50 p-3.5 rounded-xl border border-slate-700/50 hover:border-slate-600 transition-colors">
-                    <span className="text-xs text-slate-400 block mb-1">Status</span>
-                    <span className="text-sm font-medium text-green-400 bg-green-400/10 px-2.5 py-1 rounded-md inline-block border border-green-400/20">Active Lead</span>
-                  </div>
-                  <div className="bg-slate-900/50 p-3.5 rounded-xl border border-slate-700/50 hover:border-slate-600 transition-colors">
-                    <span className="text-xs text-slate-400 block mb-1">Channel</span>
-                    <span className="text-sm text-slate-200 capitalize flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${activeChat.contact.provider === 'whatsapp' ? 'bg-green-500' : 'bg-blue-400'}`}></div>
-                      {activeChat.contact.provider}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              
-              <div>
-                <h3 className="text-xs uppercase font-bold text-slate-500 tracking-wider mb-3 flex justify-between items-center">
-                  Notes
-                  <span className="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-slate-400">Auto-save</span>
-                </h3>
-                <textarea 
-                  className="w-full bg-slate-900/80 border border-slate-700/50 rounded-xl p-3.5 text-sm text-slate-300 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none h-32 transition-all placeholder-slate-600 shadow-inner"
-                  placeholder="Add a note about this contact..."
-                  defaultValue="Interested in enterprise API integration. Follow up on Tuesday."
-                ></textarea>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

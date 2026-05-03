@@ -46,10 +46,19 @@ func main() {
 	{
 		api.GET("/chats", handlers.GetChats)
 		api.GET("/chats/:id/messages", handlers.GetMessages)
-		api.POST("/chats/:id/send", handlers.SendMessageFromAgent) // Send from UI
+		api.POST("/chats/:id/send", handlers.SendMessageFromAgent)
 	}
 
-	// API Routes for CRM (Inbound Webhook from CRM to Us)
+	// Serve static files from frontend build
+	r.Static("/assets", "./public/assets")
+	r.StaticFile("/favicon.svg", "./public/favicon.svg")
+	r.StaticFile("/icons.svg", "./public/icons.svg")
+	
+	r.NoRoute(func(c *gin.Context) {
+		c.File("./public/index.html")
+	})
+
+	// API Routes for CRM
 	crm := r.Group("/crm/v1")
 	{
 		crm.POST("/send", handlers.CRMInboundSend) // CRM sends message to chat

@@ -1,0 +1,25 @@
+# Build frontend
+FROM node:20-alpine as frontend-builder
+WORKDIR /app/frontend
+COPY frontend/package*.json ./
+RUN npm install
+COPY frontend/ ./
+RUN npm run build
+
+# Build backend
+FROM golang:1.21-alpine as backend-builder
+WORKDIR /app/backend
+COPY backend/go.mod backend/go.sum ./
+RUN go mod download
+COPY backend/ ./
+RUN go build -o main ./cmd/api
+
+# Final image
+FROM alpine:latest
+RUN apk add --no-cache ca-certificates
+WORKDIR /root/
+COPY --from=backend-builder /app/backend/main .
+COPY --from=frontend-builder /app/frontend/dist ./public
+
+EXPOSE 8080
+CMD ["./main"]

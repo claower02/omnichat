@@ -29,7 +29,8 @@ func InitDB() {
 	// Auto Migrate
 	err = DB.AutoMigrate(&models.Contact{}, &models.Chat{}, &models.Message{}, &models.WebhookConfig{})
 	if err != nil {
-		log.Fatalf("Failed to migrate database: %v", err)
+		log.Printf("ERROR: Failed to migrate database: %v", err)
+		return
 	}
 
 	fmt.Println("Database connection established and migrated")

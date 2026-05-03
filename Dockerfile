@@ -17,7 +17,7 @@ RUN go build -o main ./cmd/api
 # Final image
 FROM alpine:latest
 RUN apk add --no-cache ca-certificates
-WORKDIR /root/
+WORKDIR /app
 COPY --from=backend-builder /app/backend/main .
 COPY --from=frontend-builder /app/frontend/dist ./public
 

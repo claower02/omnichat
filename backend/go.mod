@@ -1,6 +1,6 @@
 module github.com/user/omnichat-backend
 
-go 1.21
+go 1.23
 
 require (
 	github.com/bytedance/gopkg v0.1.3 // indirect
